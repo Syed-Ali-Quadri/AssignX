@@ -15,5 +15,5 @@ connectDB()
     });
 })
 .catch((err) => {
-    console.log("Error while running the server, ", err);
+    console.log("Error while running the server,", err);
 })

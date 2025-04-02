@@ -6,12 +6,12 @@ const connectDB = async () => {
 			process.env.MONGODB_URL
 		);
 		console.log(
-			"Connected to the database, DB string is: ",
+			"Connected to the database, DB string is:",
 			connectionInstense.connection.host
 		);
 	} catch (error) {
 		console.log(
-			"Something went wrong while connecting the database, ",
+			"Something went wrong while connecting the database,",
 			error
 		);
 		process.exit(1);
