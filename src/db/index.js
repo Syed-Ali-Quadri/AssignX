@@ -7,7 +7,7 @@ const connectDB = async () => {
 		);
 		console.log(
 			"Connected to the database, DB string is: ",
-			connectionInstense.host
+			connectionInstense.connection.host
 		);
 	} catch (error) {
 		console.log(
