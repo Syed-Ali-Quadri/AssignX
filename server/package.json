@@ -1,0 +1,25 @@
+{
+  "name": "assignx-backend",
+  "version": "1.0.0",
+  "description": "This is the backedend for AssignX.",
+  "keywords": [
+    "nodejs",
+    "expressjs",
+    "taskmanager"
+  ],
+  "homepage": "https://github.com/Syed-Ali-Quadri/AssignX#readme",
+  "bugs": {
+    "url": "https://github.com/Syed-Ali-Quadri/AssignX/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Syed-Ali-Quadri/AssignX.git"
+  },
+  "license": "MIT",
+  "author": "Syed Ali Quadri",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
