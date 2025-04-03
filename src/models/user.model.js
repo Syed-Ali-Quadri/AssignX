@@ -43,7 +43,7 @@ const userSchema = new Schema(
 			type: Number
 		},
 		betaAccess: {
-			Boolean: false,
+			type: Boolean,
 			default: false
 		},
 		affiliateCode: {
