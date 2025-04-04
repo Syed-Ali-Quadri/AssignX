@@ -1,14 +1,16 @@
 import { AsyncHandler } from "../utilities/Asynchandler.js";
 import { ApiResponse } from "../utilities/ApiResponse.js";
 import { ApiError } from "../utilities/ApiError.js";
+import { uploadFileOnCloudinary, deleteFileOnCloudinary } from "../utilities/Cloudinary.js";
 import User from "../models/user.model.js";
 import mongoose from "mongoose";
+import fs from "fs"
 
 const createUser = AsyncHandler(async (req, res) => {
 	const { fullName, username, email, password, phoneNo } = req.body;
     const avatarLocalFile = req.file?.path;
 
-	if (fullName || username || email || password)
+	if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim())
 		throw new ApiError(406, "Fill up the required field.");
 
 	if (validator.isEmail(email) === false)
@@ -23,21 +25,31 @@ const createUser = AsyncHandler(async (req, res) => {
 
 	if (findUser) throw new ApiError(401, "User already exist.");
 
-	// TODO: First using multer accept the picture file and upload to the cloud store and save it on database and delete the file anyway.
-	const user = await User.create({
-		fullName,
-		email,
-		username,
-		password,
-		phoneNo
-		// avatar
-	});
+    try {
 
-	if (!user) throw new ApiError(500, "Error while creating the user.");
+        const avatar = await uploadFileOnCloudinary(avatarLocalFile, "image");
+        if(!avatar) throw new ApiError(404, "Image not found.");
+        
+        const user = await User.create({
+            fullName,
+            email,
+            username,
+            password,
+            phoneNo,
+            avatar: avatar.url
+        });
+    
+        if (!user) throw new ApiError(500, "Error while creating the user.");
+        fs.unlinkSync(avatarLocalFile);
 
-	return res
-		.status(201)
-		.json(new ApiResponse(201, user, "User created successfully."));
+        return res
+            .status(201)
+            .json(new ApiResponse(201, user, "User created successfully."));
+    } catch (error) {
+        fs.unlinkSync(avatarLocalFile);
+        new ApiError(500, "Something went wrong.");
+    }
+    
 });
 
 const updateUserInfo = AsyncHandler(async (req, res) => {
