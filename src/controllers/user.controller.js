@@ -53,18 +53,51 @@ const createUser = AsyncHandler(async (req, res) => {
 });
 
 const updateUserInfo = AsyncHandler(async (req, res) => {
-	const { userId } = req.params;
-	const { fullName, username, email, phoneNo } = req.body;
+    const { userId } = req.params;
+    const { fullName, username, email, phoneNo } = req.body;
 
-	if (
-		!mongoose.Types.ObjectId.isValid(userId) ||
-		!await User.findById(userId)
-	)
-		return new ApiError(500, "Invalid request.");
+    if (!fullName && !username && !email && !phoneNo)
+        throw new ApiError(406, "Fill up at least one field.");
 
-	return res
-		.status(200)
-		.json(new ApiResponse(200, "", "User info updated successfully."));
+    if (email && !validator.isEmail(email))
+        throw new ApiError(401, "Email is not valid.");
+
+    if (phoneNo && !validator.isMobilePhone(phoneNo, "en-IN"))
+        throw new ApiError(401, "Phone number is not valid.");
+
+    if (!mongoose.Types.ObjectId.isValid(userId))
+        throw new ApiError(400, "Invalid user ID.");
+
+    const findUser = await User.findById(userId);
+    if (!findUser)
+        throw new ApiError(404, "User not found.");
+
+    let isSaved = false;
+
+    if (fullName?.trim()) {
+        findUser.fullName = fullName;
+        isSaved = true;
+    }
+    if (username?.trim()) {
+        findUser.username = username;
+        isSaved = true;
+    }
+    if (email?.trim()) {
+        findUser.email = email;
+        isSaved = true;
+    }
+    if (phoneNo?.trim()) {
+        findUser.phoneNo = phoneNo;
+        isSaved = true;
+    }
+
+    if (isSaved) await findUser.save();
+
+    const user = await User.findById(findUser._id);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User info updated successfully."));
 });
 
 const updateUserAvatar = AsyncHandler(async (req, res) => {
