@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 
 const createUser = AsyncHandler(async (req, res) => {
 	const { fullName, username, email, password, phoneNo } = req.body;
+    const avatarLocalFile = req.file?.path;
 
 	if (fullName || username || email || password)
 		throw new ApiError(406, "Fill up the required field.");
