@@ -178,9 +178,30 @@ const deleteUser = AsyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "", "User created successfully."));
 });
 
+const loginUser = AsyncHandler(async (req, res) => {
+    
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "", "User Login successfully."));
+});
+
 const logoutUser = AsyncHandler(async (req, res) => {
 	const { userId } = req.params;
 
+    const logoutUser = AsyncHandler(async (req, res) => {
+        const { userId } = req.params;
+    
+        if (
+            !mongoose.Types.ObjectId.isValid(userId) ||
+            !await User.findById(userId)
+        )
+            return new ApiError(500, "Invalid request.");
+    
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "", "User Logout successfully."));
+    });
 	if (
 		!mongoose.Types.ObjectId.isValid(userId) ||
 		!await User.findById(userId)
@@ -219,14 +240,23 @@ const getAllUsersAdminOnly = AsyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, "", "User created successfully."));
 });
 
+const changeUserPasswordAdminOnly = AsyncHandler(async (req, res) => {
+	return res
+		.status(200)
+		.json(new ApiResponse(200, "", "User created successfully."));
+});
+
 export {
 	createUser,
 	updateUserInfo,
 	updateUserAvatar,
 	updateUserPassword,
 	getUserInfo,
+    loginUser,
+    logoutUser,
 	deleteUser,
 	getRefreshToken,
 	getAllUsersAdminOnly,
-	deleteUserAdminOnly
+	deleteUserAdminOnly,
+    changeUserPasswordAdminOnly
 };
