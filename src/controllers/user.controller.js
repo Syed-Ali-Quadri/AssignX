@@ -74,34 +74,37 @@ const updateUserInfo = AsyncHandler(async (req, res) => {
 
     let isSaved = false;
 
+    const user = await User.findById(userId);
+
     if (fullName?.trim()) {
-        findUser.fullName = fullName;
+        user.fullName = fullName;
         isSaved = true;
     }
     if (username?.trim()) {
-        findUser.username = username;
+        user.username = username;
         isSaved = true;
     }
     if (email?.trim()) {
-        findUser.email = email;
+        user.email = email;
         isSaved = true;
     }
     if (phoneNo?.trim()) {
-        findUser.phoneNo = phoneNo;
+        user.phoneNo = phoneNo;
         isSaved = true;
     }
 
-    if (isSaved) await findUser.save();
+    if (isSaved) await user.save({ validBeforeSave: true });
 
-    const user = await User.findById(findUser._id);
+    const updatedUser = await User.findById(findUser._id);
 
     return res
         .status(200)
-        .json(new ApiResponse(200, user, "User info updated successfully."));
+        .json(new ApiResponse(200, updatedUser, "User info updated successfully."));
 });
 
 const updateUserAvatar = AsyncHandler(async (req, res) => {
 	const { userId } = req.params;
+    const avatarLocalFile = req.file?.path;
 
 	if (
 		!mongoose.Types.ObjectId.isValid(userId) ||
@@ -109,9 +112,27 @@ const updateUserAvatar = AsyncHandler(async (req, res) => {
 	)
 		return new ApiError(500, "Invalid request.");
 
-	return res
-		.status(200)
-		.json(new ApiResponse(200, "", "User avatar updated successfully."));
+    if (!avatarLocalFile)
+        throw new ApiError(406, "Avatar file is not uploaded.");
+
+    try {
+
+        const avatar = await uploadFileOnCloudinary(avatarLocalFile, "image");
+        if(!avatar) throw new ApiError(404, "Image not found.");
+            
+        const user = await User.findByIdAndUpdate(userId, { avatar: avatar.url });
+        
+        if (!user) throw new ApiError(500, "Error while updating the user.");
+        fs.unlinkSync(avatarLocalFile);
+    
+        return res
+            .status(200)
+            .json(new ApiResponse(200, user , "User avatar updated successfully."));
+
+        } catch (error) {
+            fs.unlinkSync(avatarLocalFile);
+            new ApiError(500, "Something went wrong.");
+        }
 });
 
 const updateUserPassword = AsyncHandler(async (req, res) => {
